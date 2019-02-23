@@ -1,0 +1,199 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Zain-FMECA-UoG</title>
+    <link href="{% static "index.css" %}" rel="stylesheet" type="text/css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet" type="text/css"/>
+    <link href="https://fonts.googleapis.com/css?family=B612|Righteous" rel="stylesheet"> 
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css" rel="stylesheet" type="text/css"/>  
+  </head>
+  <body>
+<div class="container center">
+  <nav class="black transparent">
+          <a  onClick="showInfo()" class="modal-trigger waves-effect waves-light orange btn-small">Info</a> |  
+    <a id="togglebtn" href="#" onClick="viewMatrixTable()" class="waves-effect waves-light btn-small">View Table</a> | 
+      <a onClick="AddHazard()" href="#add-hazard-view" class="waves-effect waves-light green btn-small">Add Hazard</a> | 
+      <a onClick="showQuestionnaire()" href="#questionnaire" class="waves-effect waves-light purple btn-small">Questionnaire</a> | 
+      <a onClick="resetMatrix()" href="#" class="waves-effect waves-light red btn-small">Reset Matrix</a>
+  </nav>
+</div>
+
+<div class="container" id="view" style="margin-top:50px">
+    <div id="hazard-card" style="display:none;" class="center card black darken-1">
+      <div class="card-content white-text">
+        <h4 class="card-title" id="hazard-title">Card Title</h4>
+        <p id="hazard-causes"></p>
+        <p id="hazard-actions"></p>
+        <p id="hazard-detection"></p>
+        <p id="hazard-rpn"></p>  
+      </div>
+      <div class="card-action">
+          <a class="waves-effect waves-light green btn-small" onClick="editHazard()">Edit</a>
+        <a class="waves-effect waves-light red btn-small" onClick="deleteHazard()">Delete</a>
+        <a class="waves-effect waves-light blue btn-small" onClick="closeCard()">Close</a>
+      </div>
+    </div>
+    <div id="add-hazard-view" style="display:none;" class ="row center container white-text">
+      <form class="col s12" id="hazard-form">
+        <div class="row center">
+          <div class="input-field col s6">
+            <input id="input-title" type="text" class="validate" required>
+            <label for="input-title">Hazard Title</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s4">
+              <select id="input-detection" class="browser-default" required>
+                  <option value=""  disabled selected>Detection Rate</option>
+                  <option value="Certain">Certain</option>
+                  <option value="High">High</option>
+                  <option value="Moderate">Moderate</option>
+                  <option value="Low">Low</option>
+                  <option value="Uncertain">Uncertain</option>
+              </select>
+          </div>
+          <div class="input-field col s4">
+              <select id="input-severity" class="browser-default" required>
+                  <option value=""  disabled selected>Severity Level</option>
+                  <option value="1">None</option>
+                  <option value="2">Minor</option>
+                  <option value="3">Moderate</option>
+                  <option value="4">Harmful</option>
+                  <option value="5">Catastrophic</option>
+              </select>
+          </div>
+          <div class="input-field col s4">
+              <select id="input-occurance" class="browser-default" required>
+                  <option value=""  disabled selected>Occurance Rate</option>
+                  <option value="1">Remote</option>
+                  <option value="2">Low</option>
+                  <option value="3">Occasional</option>
+                  <option value="4">High</option>
+                  <option value="5">Certain</option>
+              </select>
+          </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s12">
+                <textarea id="input-causes" class="materialize-textarea"></textarea>
+                <label for="input-causes">Causes</label>
+            </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s12">
+              <textarea id="input-actions" class="materialize-textarea"></textarea>
+              <label for="input-actions">Actions</label>
+          </div>
+        </div>
+        <div class="row center">
+            <div class="input-field col s6">
+                <a onClick="saveChanges()" class="waves-effect waves-light green btn-small">Save Changes</a> | 
+            </div>
+            <div class="input-field col s6">
+                <a onClick="hideAddHazard()" class="waves-effect waves-light Blue btn-small">Cancel</a> | 
+            </div>
+          </div>
+      </form>
+    </div>
+    <div id="info-card" style="display:none;" class="center card black darken-1">
+        <div class="card-content white-text">
+          <h4 class="card-title">Open Assessment (M) Tool : 2418596u</h4>
+            <p>
+              This tool is developed to help Competent Authorities perform risk assessment for critical infrastructure (Transport) under NIS directive</p>
+              <p>This tool is based on FMECA (Failure Modes, Effects and Criticality Analysis) technique and also includes a risk matrix and rank table</p>
+              <p>This tool can be extended for other sectors under OES (Operation of Essential Services) as well</p>
+              <p>This tool uses modified RPN which gives severity of hazard more priority in criticality over likelihood and detection rates</p>
+              <p>This tool can be further extended to incorporate fault trees and other related hazard analysis techniques</p>
+        </div>
+        <div class="card-action">
+          <a class="waves-effect waves-light blue btn-small" onClick="closeCard()">Close</a>
+        </div>
+      </div>
+  <table id="riskMatrix" class="z-depth-3 responsive-table centered">
+    <thead>
+      <tr class="heading">
+        <td class="teal">Occurance/Severity</td>
+        <td>None</td>
+        <td>Minor</td>
+        <td>Moderate</td>
+        <td>Harmful</td>
+        <td>Catastrophic</td>
+      </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td class="heading">Remote</td>
+      <td class="normal"></td>
+      <td class="normal"></td>
+      <td class="low"></td>
+      <td class="moderate"></td>
+      <td class="moderate"></td>
+    </tr>
+    <tr>
+      <td class="heading">Low</td>
+      <td class="normal"></td>
+      <td class="normal"></td>
+      <td class="low"></td>
+      <td class="moderate"></td>
+      <td class="critical"></td>
+    </tr>
+    <tr>
+      <td class="heading">Occasional</td>
+      <td class="normal"></td>
+      <td class="low"></td>
+      <td class="moderate"></td>
+      <td class="critical"></td>
+      <td class="critical"></td>
+    </tr>
+    <tr>
+      <td class="heading">High</td>
+      <td class="low"></td>
+      <td class="moderate"></td>
+      <td class="moderate"></td>
+      <td class="critical"></td>
+      <td class="critical"></td>
+    </tr>   
+    <tr>
+      <td class="heading">Certain</td>
+      <td class="moderate"></td>
+      <td class="moderate"></td>
+      <td class="critical"></td>
+      <td class="critical"></td>
+      <td class="critical"></td>
+    </tr>
+    </tbody>
+  </table>
+  <table id="hazardTable" style="display:none;" class="z-depth-3 responsive-table white-text black">
+      <thead>
+        <tr class="heading">
+          <td class="teal">Rank</td>
+          <td>Title</td>
+          <td>Severity (S)</td>
+          <td>Likelihood (O)</td>
+          <td>Detection (D)</td>
+          <td>Causes</td>
+          <td>Actions</td>
+          <td>RPN = ((S*0.65)*10) + ((O*0.20)*10) + ((D*0.15)*10)</td>
+        </tr>
+      </thead>
+      <tbody id="hazardTable-body">
+      </tbody>
+  </table>
+      <div class = "container center">
+      <iframe id="questionnaire" style="display:none;" src="https://docs.google.com/forms/d/e/1FAIpQLSfIglh_XTaiXDtJL1aq7OSdfVt6aC8OObPV6q_iIPD1jgxBtA/viewform?embedded=true" width="640" height="4429" frameborder="0" marginheight="0" marginwidth="0">Loading...</iframe>
+        </div>
+    </div>
+
+<footer class="white-text center container transparent">
+  Muhammad Zain Ul Islam - Safety Critical System - UoG
+</footer>
+        
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
+  <script src="{% static "index.js" %}"></script>
+  </body>
+</html>
